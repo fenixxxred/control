@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Loja - Sistema Completo</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,Helvetica,sans-serif}
+    body{display:flex;min-height:100vh;background:#fac2c2;color:#160202}
+    /* Sidebar */
+    .sidebar{width:240px;background:#160202;color:#F6FAFD;display:flex;flex-direction:column}
+    .logo{padding:20px;text-align:center;font-weight:700;font-size:1.05rem;background:#b30000;border-bottom:1px solid #b3000044}
+    .nav{list-style:none;padding:8px 0;overflow:auto}
+    .nav li{padding:14px 18px;cursor:pointer;transition:background .18s}
+    .nav li:hover,.nav li.active{background:#b30000}
+    /* Main */
+    .main{flex:1;padding:20px;overflow:auto}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+    .header h1{font-size:1.3rem;color:#160202}
+    .actions-row{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{padding:8px 12px;border-radius:6px;border:0;cursor:pointer;background:#b30000;color:#fff}
+    .btn.ghost{background:transparent;color:#b30000;border:1px solid #b30000}
+    .btn.warn{background:#dc3545}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+    .card{background:#fff;border:1px solid #b3000022;border-radius:10px;padding:16px}
+    .card h2{font-size:0.95rem;color:#b30000;margin-bottom:6px}
+    .card p{font-size:1.4rem;font-weight:700;color:#b30000}
+    .section{margin-top:16px;background:#fff;border:1px solid #b3000022;border-radius:10px;padding:16px}
+    .grid{display:grid;gap:12px}
+    .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    label{font-size:.85rem;color:#b30000}
+    input,select,textarea{width:100%;padding:10px;border:1px solid #cfd8e3;border-radius:8px;background:#fff;color:#160202}
+    table{width:100%;border-collapse:collapse;margin-top:10px;background:#fff;border-radius:8px;overflow:hidden}
+    thead th{background:#b30000;color:#fff;text-align:left;padding:12px;font-weight:700}
+    tbody td{padding:12px;border-bottom:1px solid #e9eef3}
+    tbody tr:hover{background:#f4f9ff}
+    .muted{color:#16020299}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:16px}
+    .modal.open{display:flex}
+    .modal-content{background:#fff;width:min(900px,100%);max-height:90vh;overflow:auto;border-radius:10px;padding:16px;position:relative}
+    /* ====== MODAL NOVO CLIENTE ====== */
+#modalNovoCliente {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+}
+
+#modalNovoCliente.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#modalNovoCliente .modal-content {
+  background: #ffffff;
+  padding: 20px 25px;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  animation: slideIn 0.3s ease;
+}
+
+#modalNovoCliente h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  color: #333;
+  text-align: center;
+  font-weight: bold;
+}
+
+#modalNovoCliente label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+#modalNovoCliente input {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+#modalNovoCliente input:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+#modalNovoCliente button {
+  padding: 10px 16px;
+  margin-top: 8px;
+  margin-right: 8px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.3s ease;
+}
+
+#modalNovoCliente #nc-salvar {
+  background: #e24a4a;
+  color: #fff;
+}
+
+#modalNovoCliente #nc-salvar:hover {
+  background: #b30000;
+}
+
+#modalNovoCliente button:last-child {
+  background: #e0e0e0;
+  color: #333;
+}
+
+#modalNovoCliente button:last-child:hover {
+  background: #cfcfcf;
+}
+
+/* Animação de entrada */
+@keyframes slideIn {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+    .close{position:absolute;right:12px;top:10px;font-size:22px;cursor:pointer}
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid #cfd8e3;font-size:.9rem}
+    .total{text-align:right;font-weight:700;margin-top:10px}
+    @media(max-width:720px){.grid.cols-3{grid-template-columns:1fr}.grid.cols-2{grid-template-columns:1fr}.sidebar{width:200px}}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">LOJA • SISTEMA</div>
+    <ul class="nav">
+      <li class="active" data-page="dashboard">Dashboard</li>
+      <li data-page="produtos">Produtos</li>
+      <li data-page="clientes">Clientes</li>
+      <li data-page="vendas">Vendas</li>
+      <li data-page="movimentacoes">Movimentações</li>
+      <li data-page="fornecedores">Fornecedores</li>
+      <li data-page="relatorios">Relatórios</li>
+      <li data-page="backup">Backup</li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <div id="view"></div>
+  </main>
+
+  <!-- Modal: Finalizar Venda -->
+  <div id="modalVenda" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <span class="close" data-close>×</span>
+      <h2>Finalizar Venda</h2>
+      <div class="section">
+        <div class="grid cols-3">
+          <div><label>Cliente</label><select id="v-cliente"></select></div>
+          <div><label>Forma de pagamento</label><select id="v-pagamento"><option>Dinheiro</option><option>Cartão crédito</option><option>Cartão débito</option><option>Pix</option></select></div>
+          <div><label>Desconto (R$)</label><input id="v-desconto" type="number" step="0.01" value="0"></div>
+        </div>
+        <div style="margin-top:12px">
+          <h3>Itens</h3>
+          <table id="v-itens-table">
+            <thead><tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Ações</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <p class="total" id="v-total">Total: R$ 0,00</p>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+            <button class="btn" id="v-confirmar">Confirmar Venda</button>
+            <button class="btn ghost" data-close>Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="modalNovoProduto" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <span class="close" data-close>×</span>
+    <h2>Novo Produto Rápido</h2>
+    <div class="section">
+      <div class="grid cols-3">
+        <div><label>Nome</label><input id="np-nome"></div>
+        <div><label>Categoria</label><input id="np-categoria"></div>
+        <div><label>Quantidade</label><input id="np-qtd" type="number" value="1"></div>
+        <div><label>Preço</label><input id="np-preco" type="number" step="0.01" value="0"></div>
+        <div><label>Fornecedor</label><input id="np-forn"></div>
+      </div>
+      <div class="actions-row" style="margin-top:10px">
+        <button class="btn" id="np-salvar">Adicionar</button>
+        <button class="btn ghost" data-close>Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div id="modalNovoCliente" class="modal">
+  <div class="modal-content">
+    <h3>Novo Cliente</h3>
+    <label>Nome:
+      <input type="text" id="nc-nome">
+    </label>
+    <label>Telefone:
+      <input type="text" id="nc-tel">
+    </label>
+    <label>Endereço
+      <input type="text" id="nc-end">
+    </label>
+
+    <button id="nc-salvar">Salvar Cliente</button>
+    <button onclick="document.getElementById('modalNovoCliente').classList.remove('open')">Cancelar</button>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ========== UTILITÁRIOS ========== */
+const LS = {
+  get(k,def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def }catch{ return def } },
+  set(k,v){ localStorage.setItem(k,JSON.stringify(v)) }
+};
+const uid = ()=> Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
+const fmtBRL = n => (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const parseFloatSafe = s => Number(s) || 0;
+
+/* ========== ESTADO ========== */
+const state = {
+  produtos: LS.get('produtos', [
+    // exemplos iniciais (opcional)
+    // {id:uid(), nome:'Vibrador Classic', categoria:'Vibradores', qtd:12, preco:79.9, fornecedor:''}
+  ]),
+  clientes: LS.get('clientes', [
+    // {id:uid(), nome:'João Silva', telefone:'', email:'', endereco:''}
+  ]),
+  vendas: LS.get('vendas', []), // vendas: {id, dataISO, clienteId, itens:[{produtoId, nome, qtd, preco}], total, forma}
+  movimentacoes: LS.get('movimentacoes', []), // {id,dataISO,produtoId,produtoNome,tipo:'Entrada'|'Saida',qtd}
+  fornecedores: LS.get('fornecedores', []) // {id,nome,contato}
+};
+function persistAll(){
+  LS.set('produtos', state.produtos);
+  LS.set('clientes', state.clientes);
+  LS.set('vendas', state.vendas);
+  LS.set('movimentacoes', state.movimentacoes);
+  LS.set('fornecedores', state.fornecedores);
+}
+
+/* ========== ROUTER / UI ========== */
+const view = document.getElementById('view');
+const routes = {};
+function navigate(page){ (routes[page]||routes.dashboard)(); document.querySelectorAll('.nav li').forEach(li=>li.classList.toggle('active', li.dataset.page===page)); }
+document.querySelectorAll('.nav li').forEach(li=>li.addEventListener('click', ()=> navigate(li.dataset.page)));
+document.addEventListener('click', e => {
+  if(e.target.matches('[data-close]')) e.target.closest('.modal')?.classList.remove('open');
+  if(e.target.classList.contains('modal')) e.target.classList.remove('open');
+});
+
+routes.dashboard = () => {
+  const totalProdutos = state.produtos.length;
+  const qtdTotal = state.produtos.reduce((s,p)=>s + Number(p.qtd),0);
+  const valorTotal = state.produtos.reduce((s,p)=> s + (p.qtd * p.preco),0);
+  const baixo = state.produtos.filter(p=>p.qtd<=5).length;
+  const vendasHoje = state.vendas.filter(v => v.dataISO.slice(0,10) === new Date().toISOString().slice(0,10)).length;
+
+  view.innerHTML = `
+    <div class="header"><h1>Dashboard</h1>
+      <div class="actions-row">
+        <button class="btn" id="novo-ativo">Novo Produto Rápido</button>
+        <button class="btn" id="nova-venda-dashboard">Nova Venda</button>
+        <button class="btn" id="novo-cliente-dashboard">Novo Cliente</button>
+        <button class="btn ghost" id="relat-rapido">Relatório Rápido (JSON)</button>
+      </div>
+    </div>
+    <div class="cards">
+      <div class="card"><h2>Produtos cadastrados</h2><p>${totalProdutos}</p></div>
+      <div class="card"><h2>Itens em estoque</h2><p>${qtdTotal}</p></div>
+      <div class="card"><h2>Valor em estoque</h2><p>${fmtBRL(valorTotal)}</p></div>
+      <div class="card"><h2>Produtos baixo estoque</h2><p>${baixo}</p></div>
+      <div class="card"><h2>Vendas Hoje</h2><p>${vendasHoje}</p></div>
+    </div>
+
+    <div class="section" style="margin-top:18px">
+      <h3>Últimas Vendas</h3>
+      ${state.vendas.length ? `<table><thead><tr><th>Data</th><th>Cliente</th><th>Total</th><th>Ações</th></tr></thead><tbody>
+        ${state.vendas.slice().reverse().slice(0,6).map(v=>`<tr data-id="${v.id}"><td>${new Date(v.dataISO).toLocaleString()}</td><td>${(state.clientes.find(c=>c.id===v.clienteId)?.nome)||'—'}</td><td>${fmtBRL(v.total)}</td><td><button class="btn ghost" data-ac="ver-venda">Ver</button></td></tr>`).join('')}
+      </tbody></table>` : '<p class="muted">Nenhuma venda ainda.</p>'}
+    </div>
+  `;
+
+  // abrir modal de novo produto (substitui handlers anteriores sem duplicar)
+  const modalNovoProduto = document.getElementById('modalNovoProduto');
+  document.getElementById('novo-ativo').onclick = () => modalNovoProduto.classList.add('open');
+
+  // salvar produto rápido
+  document.getElementById('np-salvar').onclick = () => {
+    const novoProduto = {
+      id: uid(),
+      nome: (document.getElementById('np-nome')?.value || '').trim(),
+      categoria: (document.getElementById('np-categoria')?.value || '').trim(),
+      qtd: Number(document.getElementById('np-qtd')?.value) || 0,
+      preco: parseFloatSafe(document.getElementById('np-preco')?.value),
+      fornecedor: (document.getElementById('np-forn')?.value || '').trim()
+    };
+    if(!novoProduto.nome) return alert('Informe o nome do produto.');
+    state.produtos.push(novoProduto);
+    persistAll();
+    modalNovoProduto.classList.remove('open');
+    navigate('dashboard');
+  };
+
+  // abrir modal venda
+  document.getElementById('nova-venda-dashboard').onclick = () => abrirModalVenda();
+
+  // abrir modal novo cliente
+  document.getElementById('novo-cliente-dashboard').onclick = () => {
+    const m = document.getElementById('modalNovoCliente');
+    m.classList.add('open');
+    // foca o primeiro input, se existir
+    setTimeout(()=> document.getElementById('nc-nome')?.focus(), 50);
+  };
+
+  // salvar cliente (robusto — funciona mesmo se o modal tiver apenas nome/tel/end)
+  document.getElementById('nc-salvar').onclick = () => {
+    const g = id => document.getElementById(id);
+    const nome = (g('nc-nome')?.value || '').trim();
+    const telefone = (g('nc-tel')?.value || '').trim();
+    const endereco = (g('nc-end')?.value || '').trim();
+    const cpf = g('nc-cpf') ? (g('nc-cpf').value || '').trim() : '';
+
+    if(!nome) { alert('Informe o nome do cliente.'); return; }
+
+    const novoCliente = {
+      id: uid(),
+      nome,
+      telefone: telefone || undefined,
+      endereco: endereco || undefined,
+      dataRegistro: new Date().toISOString()
+    };
+    if(cpf) novoCliente.cpf = cpf;
+
+    state.clientes.push(novoCliente);
+    persistAll();
+    document.getElementById('modalNovoCliente').classList.remove('open');
+    navigate('dashboard');
+  };
+
+  // relatório rápido JSON
+  document.getElementById('relat-rapido').onclick = ()=> {
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+    a.download=`loja-dados-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  };
+
+  // bind para ver venda da lista (substitui handlers anteriores)
+  view.querySelectorAll('[data-ac="ver-venda"]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.closest('tr').dataset.id;
+      const venda = state.vendas.find(x=>x.id===id);
+      if(!venda) return;
+      alert(`Venda em ${new Date(venda.dataISO).toLocaleString()}\nCliente: ${state.clientes.find(c=>c.id===venda.clienteId)?.nome||'—'}\nTotal: ${fmtBRL(venda.total)}\nItens:\n${venda.itens.map(i=>`${i.qtd}× ${i.nome} (${fmtBRL(i.preco)})`).join('\n')}`);
+    };
+  });
+};
+
+
+
+
+/* ========== PRODUTOS ========== */
+routes.produtos = ()=>{
+  const rows = state.produtos.map(p=>`
+    <tr data-id="${p.id}">
+      <td>${p.nome}</td>
+      <td>${p.categoria}</td>
+      <td>${p.qtd}</td>
+      <td>${fmtBRL(p.preco)}</td>
+      <td>${p.fornecedor||'—'}</td>
+      <td>
+        <button class="btn ghost" data-ac="edit">Editar</button>
+        <button class="btn warn" data-ac="del">Excluir</button>
+      </td>
+    </tr>
+  `).join('');
+  view.innerHTML = `
+    <div class="header"><h1>Produtos</h1><div class="actions-row"><button class="btn" id="novo-prod">Novo produto</button><button class="btn ghost" id="export-prod">Exportar CSV</button></div></div>
+    ${rows? `<table><thead><tr><th>Nome</th><th>Categoria</th><th>Qtd</th><th>Preço</th><th>Fornecedor</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="muted">Nenhum produto cadastrado.</p>'}
+  `;
+  document.getElementById('novo-prod').onclick = ()=> editarProduto();
+  document.getElementById('export-prod').onclick = ()=> {
+    let csv = 'Nome,Categoria,Quantidade,Preco,Fornecedor\n';
+    state.produtos.forEach(p => csv += `${p.nome},${p.categoria},${p.qtd},${p.preco},${p.fornecedor||''}\n`);
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='produtos.csv'; a.click();
+  };
+
+  const tbody = view.querySelector('tbody');
+  tbody?.addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    const tr = btn.closest('tr'); const id = tr.dataset.id;
+    if(btn.dataset.ac === 'del'){
+      if(!confirm('Excluir produto?')) return;
+      state.produtos = state.produtos.filter(p=>p.id!==id);
+      persistAll(); navigate('produtos');
+    }
+    if(btn.dataset.ac === 'edit'){
+      const p = state.produtos.find(x=>x.id===id); editarProduto(p);
+    }
+  });
+};
+
+function editarProduto(p){
+  const isEdit = !!p;
+  p = p || { id: uid(), nome:'', categoria:'', qtd:0, preco:0, fornecedor:'' };
+  const html = `
+    <div class="section" id="prod-form">
+      <h3>${isEdit?'Editar':'Novo'} produto</h3>
+      <div class="grid cols-3">
+        <div><label>Nome</label><input id="p-nome" value="${p.nome}"></div>
+        <div><label>Categoria</label><input id="p-cat" value="${p.categoria}"></div>
+        <div><label>Quantidade</label><input id="p-qtd" type="number" value="${p.qtd}"></div>
+        <div><label>Preço (R$)</label><input id="p-preco" type="number" step="0.01" value="${p.preco}"></div>
+        <div><label>Fornecedor</label><input id="p-forn" value="${p.fornecedor}"></div>
+      </div>
+      <div class="actions-row" style="margin-top:8px">
+        <button class="btn" id="p-salvar">${isEdit?'Salvar':'Adicionar'}</button>
+        <button class="btn ghost" id="p-cancel">Cancelar</button>
+      </div>
+    </div>
+  `;
+  view.insertAdjacentHTML('afterbegin', html);
+  document.getElementById('p-salvar').onclick = ()=>{
+    const obj = {
+      id: p.id,
+      nome: document.getElementById('p-nome').value.trim(),
+      categoria: document.getElementById('p-cat').value.trim(),
+      qtd: Number(document.getElementById('p-qtd').value) || 0,
+      preco: parseFloatSafe(document.getElementById('p-preco').value),
+      fornecedor: document.getElementById('p-forn').value.trim()
+    };
+    if(!obj.nome) return alert('Informe o nome do produto.');
+    if(isEdit){ Object.assign(state.produtos.find(x=>x.id===p.id), obj); }
+    else{ state.produtos.push(obj); }
+    persistAll(); navigate('produtos');
+  };
+  document.getElementById('p-cancel').onclick = ()=> navigate('produtos');
+}
+
+/* ========== CLIENTES ========== */
+routes.clientes = ()=>{
+  const rows = state.clientes.map(c=>`
+    <tr data-id="${c.id}">
+      <td>${c.nome}</td>
+      <td>${c.telefone||''}</td>
+      <td>${c.email||''}</td>
+      <td>
+        <button class="btn ghost" data-ac="ver">Ver</button>
+        <button class="btn ghost" data-ac="edit">Editar</button>
+        <button class="btn warn" data-ac="del">Excluir</button>
+      </td>
+    </tr>
+  `).join('');
+  view.innerHTML = `
+    <div class="header"><h1>Clientes</h1><div class="actions-row"><button class="btn" id="novo-cliente">Novo cliente</button></div></div>
+    ${rows? `<table><thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="muted">Nenhum cliente cadastrado.</p>'}
+  `;
+  document.getElementById('novo-cliente').onclick = ()=> editarCliente();
+  view.querySelector('tbody')?.addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    const tr=b.closest('tr'); const id=tr.dataset.id;
+    if(b.dataset.ac==='del'){ if(confirm('Excluir cliente?')){ state.clientes = state.clientes.filter(x=>x.id!==id); persistAll(); navigate('clientes'); } }
+    if(b.dataset.ac==='edit'){ const c = state.clientes.find(x=>x.id===id); editarCliente(c); }
+    if(b.dataset.ac==='ver'){ verCliente(id); }
+  });
+};
+
+function editarCliente(c){
+  const isEdit = !!c;
+  c = c || { id:uid(), nome:'', telefone:'', email:'', endereco:'' };
+  const html = `
+    <div class="section">
+      <h3>${isEdit?'Editar':'Novo'} cliente</h3>
+      <div class="grid cols-3">
+        <div><label>Nome</label><input id="c-nome" value="${c.nome}"></div>
+        <div><label>Telefone</label><input id="c-tel" value="${c.telefone}"></div>
+        <div><label>Email</label><input id="c-email" value="${c.email}"></div>
+        <div style="grid-column:span 3"><label>Endereço</label><input id="c-end" value="${c.endereco}"></div>
+      </div>
+      <div class="actions-row" style="margin-top:8px">
+        <button class="btn" id="c-salvar">${isEdit?'Salvar':'Adicionar'}</button>
+        <button class="btn ghost" id="c-cancel">Cancelar</button>
+      </div>
+    </div>
+  `;
+  view.insertAdjacentHTML('afterbegin', html);
+  document.getElementById('c-salvar').onclick = ()=>{
+    const obj = { id: c.id, nome: document.getElementById('c-nome').value.trim(), telefone: document.getElementById('c-tel').value.trim(), email: document.getElementById('c-email').value.trim(), endereco: document.getElementById('c-end').value.trim() };
+    if(!obj.nome) return alert('Informe o nome do cliente.');
+    if(isEdit) Object.assign(state.clientes.find(x=>x.id===c.id), obj); else state.clientes.push(obj);
+    persistAll(); navigate('clientes');
+  };
+  document.getElementById('c-cancel').onclick = ()=> navigate('clientes');
+}
+
+function verCliente(id){
+  const cli = state.clientes.find(c=>c.id===id); if(!cli) return;
+  const vendas = state.vendas.filter(v=>v.clienteId===id).slice().reverse();
+  view.innerHTML = `
+    <div class="header"><h1>Cliente: ${cli.nome}</h1><div class="actions-row"><button class="btn" id="voltar">Voltar</button></div></div>
+    <div class="section">
+      <h3>Dados</h3>
+      <div class="grid cols-3">
+        <div><label>Nome</label><div class="chip">${cli.nome}</div></div>
+        <div><label>Telefone</label><div class="chip">${cli.telefone||'—'}</div></div>
+        <div><label>Email</label><div class="chip">${cli.email||'—'}</div></div>
+      </div>
+      <div style="margin-top:12px"><label>Endereço</label><div class="chip">${cli.endereco||'—'}</div></div>
+    </div>
+    <div class="section">
+      <h3>Histórico de Compras (${vendas.length})</h3>
+      ${vendas.length? `<table><thead><tr><th>Data</th><th>Total</th><th>Itens</th></tr></thead><tbody>${vendas.map(v=>`<tr><td>${new Date(v.dataISO).toLocaleString()}</td><td>${fmtBRL(v.total)}</td><td>${v.itens.map(i=>`${i.qtd}× ${i.nome}`).join(', ')}</td></tr>`).join('')}</tbody></table>` : '<p class="muted">Sem compras.</p>'}
+    </div>
+  `;
+  document.getElementById('voltar').onclick = ()=> navigate('clientes');
+}
+
+/* ========== VENDAS ========== */
+routes.vendas = ()=>{
+  // build product options for adição rápida e cliente select
+  const prodOptions = state.produtos.map(p=>`<option value="${p.id}">${p.nome} — ${p.qtd} un.</option>`).join('');
+  const clienteOptions = `<option value="">— Cliente (opcional) —</option>` + state.clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+  const rows = state.vendas.slice().reverse().map(v=>`
+    <tr data-id="${v.id}">
+      <td>${new Date(v.dataISO).toLocaleString()}</td>
+      <td>${state.clientes.find(c=>c.id===v.clienteId)?.nome || '—'}</td>
+      <td>${fmtBRL(v.total)}</td>
+      <td><button class="btn ghost" data-ac="ver">Ver</button></td>
+    </tr>
+  `).join('');
+
+  view.innerHTML = `
+    <div class="header"><h1>Vendas</h1><div class="actions-row"><button class="btn" id="nova-venda">Nova Venda</button></div></div>
+    <div class="section">
+      <h3>Vendas recentes</h3>
+      ${rows? `<table><thead><tr><th>Data</th><th>Cliente</th><th>Total</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="muted">Nenhuma venda registrada.</p>'}
+    </div>
+  `;
+
+  document.getElementById('nova-venda').onclick = ()=> abrirModalVenda();
+
+  // view actions
+  view.querySelectorAll('[data-ac="ver"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.closest('tr').dataset.id;
+      const v = state.vendas.find(x=>x.id===id);
+      if(!v) return;
+      alert(`Venda em ${new Date(v.dataISO).toLocaleString()}\nCliente: ${state.clientes.find(c=>c.id===v.clienteId)?.nome||'—'}\nTotal: ${fmtBRL(v.total)}\nItens:\n${v.itens.map(i=>`${i.qtd}× ${i.nome} — ${fmtBRL(i.preco)}`).join('\n')}`);
+    });
+  });
+};
+
+// Modal venda logic
+function abrirModalVenda(prefill){
+  // prefill object: {clienteId?}
+  const modal = document.getElementById('modalVenda');
+  modal.classList.add('open');
+  const selCliente = document.getElementById('v-cliente');
+  selCliente.innerHTML = `<option value="">— Cliente (opcional) —</option>` + state.clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+  document.getElementById('v-desconto').value = 0;
+  const tbody = document.querySelector('#v-itens-table tbody');
+  let itens = []; // {produtoId,nome,qtd,preco}
+  function renderItens(){
+    tbody.innerHTML = itens.map((it,idx)=>`<tr data-idx="${idx}"><td>${it.nome}</td><td>${it.qtd}</td><td>${fmtBRL(it.preco)}</td><td>${fmtBRL(it.qtd*it.preco)}</td><td><button class="btn warn" data-del="${idx}">Rem</button></td></tr>`).join('');
+    const sub = itens.reduce((s,i)=>s + i.qtd * i.preco, 0);
+    const desconto = parseFloatSafe(document.getElementById('v-desconto').value);
+    const total = Math.max(0, sub - desconto);
+    document.getElementById('v-total').textContent = `Total: ${fmtBRL(total)}`;
+  }
+  // create quick add controls inside modal content (if not present)
+  const modalContent = modal.querySelector('.modal-content');
+  if(!modalContent.querySelector('#v-add-row')){
+    const addRow = document.createElement('div');
+    addRow.id = 'v-add-row';
+    addRow.style.marginTop = '10px';
+    addRow.innerHTML = `
+      <div class="grid cols-3">
+        <div><label>Produto</label><select id="v-produto">${state.produtos.map(p=>`<option value="${p.id}">${p.nome} — ${p.qtd} un.</option>`).join('')}</select></div>
+        <div><label>Quantidade</label><input id="v-qtd" type="number" value="1"></div>
+        <div style="display:flex;align-items:end;gap:8px"><button class="btn" id="v-add-item">Adicionar item</button></div>
+      </div>
+    `;
+    modalContent.appendChild(addRow);
+  } else {
+    // refresh product select
+    modalContent.querySelector('#v-produto').innerHTML = state.produtos.map(p=>`<option value="${p.id}">${p.nome} — ${p.qtd} un.</option>`).join('');
+    modalContent.querySelector('#v-qtd').value = 1;
+  }
+
+  renderItens();
+
+  // add item
+  modalContent.querySelector('#v-add-item').onclick = ()=>{
+    const pid = modalContent.querySelector('#v-produto').value;
+    const qtd = Math.max(1, Number(modalContent.querySelector('#v-qtd').value)||1);
+    const prod = state.produtos.find(p=>p.id===pid);
+    if(!prod) return alert('Produto inválido');
+    if(prod.qtd < qtd) return alert('Estoque insuficiente para esse produto!');
+    const existing = itens.find(i=>i.produtoId===pid);
+    if(existing) existing.qtd += qtd; else itens.push({ produtoId: prod.id, nome: prod.nome, qtd, preco: prod.preco });
+    renderItens();
+  };
+
+  // remove item
+  tbody.onclick = e=>{
+    const del = e.target.closest('[data-del]');
+    if(!del) return;
+    const idx = Number(del.dataset.del);
+    itens.splice(idx,1); renderItens();
+  };
+
+  // desconto change
+  modalContent.querySelector('#v-desconto').oninput = renderItens;
+
+  // confirm sale
+  document.getElementById('v-confirmar').onclick = ()=>{
+    if(itens.length===0) return alert('Adicione ao menos um item.');
+    // recalc totals & check stock again
+    for(const it of itens){
+      const prod = state.produtos.find(p=>p.id===it.produtoId);
+      if(!prod) return alert(`Produto ${it.nome} não encontrado.`);
+      if(prod.qtd < it.qtd) return alert(`Estoque insuficiente para ${it.nome}.`);
+    }
+    const sub = itens.reduce((s,i)=>s + i.qtd * i.preco, 0);
+    const desconto = parseFloatSafe(document.getElementById('v-desconto').value);
+    const total = Math.max(0, sub - desconto);
+    const clienteId = document.getElementById('v-cliente').value || null;
+    const forma = document.getElementById('v-pagamento').value;
+    // create venda
+    const venda = { id: uid(), dataISO: new Date().toISOString(), clienteId, itens: JSON.parse(JSON.stringify(itens)), total, forma };
+    state.vendas.push(venda);
+    // subtract stock + record movimentacoes
+    itens.forEach(it=>{
+      const prod = state.produtos.find(p=>p.id===it.produtoId);
+      prod.qtd = prod.qtd - it.qtd;
+      state.movimentacoes.push({ id: uid(), dataISO: new Date().toISOString(), produtoId: prod.id, produtoNome: prod.nome, tipo: 'Saida', qtd: it.qtd });
+    });
+    persistAll();
+    alert('Venda registrada com sucesso!');
+    modal.classList.remove('open');
+    navigate('vendas');
+  };
+}
+
+/* ========== MOVIMENTAÇÕES ========== */
+routes.movimentacoes = ()=>{
+  const rows = state.movimentacoes.slice().reverse().map(m=>`<tr><td>${new Date(m.dataISO).toLocaleString()}</td><td>${m.produtoNome}</td><td>${m.tipo}</td><td>${m.qtd}</td></tr>`).join('');
+  view.innerHTML = `
+    <div class="header"><h1>Movimentações</h1></div>
+    <div class="section">
+      <h3>Registrar movimentação manual</h3>
+      <div class="grid cols-3">
+        <div><label>Produto</label><select id="mm-prod">${state.produtos.map(p=>`<option value="${p.id}">${p.nome} — ${p.qtd} un.</option>`).join('')}</select></div>
+        <div><label>Tipo</label><select id="mm-tipo"><option>Entrada</option><option>Saida</option></select></div>
+        <div><label>Quantidade</label><input id="mm-qtd" type="number" value="1"></div>
+      </div>
+      <div class="actions-row" style="margin-top:8px"><button class="btn" id="mm-add">Registrar</button></div>
+    </div>
+    <div class="section">
+      <h3>Histórico</h3>
+      ${rows? `<table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="muted">Nenhuma movimentação.</p>'}
+    </div>
+  `;
+  document.getElementById('mm-add').onclick = ()=>{
+    const pid = document.getElementById('mm-prod').value;
+    const tipo = document.getElementById('mm-tipo').value;
+    const qtd = Math.max(1, Number(document.getElementById('mm-qtd').value)||1);
+    const prod = state.produtos.find(p=>p.id===pid);
+    if(!prod) return alert('Produto inválido');
+    if(tipo === 'Saida' && prod.qtd < qtd) return alert('Estoque insuficiente!');
+    prod.qtd += (tipo === 'Entrada' ? qtd : -qtd);
+    state.movimentacoes.push({ id: uid(), dataISO: new Date().toISOString(), produtoId: prod.id, produtoNome: prod.nome, tipo, qtd });
+    persistAll(); navigate('movimentacoes');
+  };
+};
+
+/* ========== FORNECEDORES ========== */
+routes.fornecedores = ()=>{
+  const rows = state.fornecedores.map(f=>`<tr data-id="${f.id}"><td>${f.nome}</td><td>${f.contato||''}</td><td><button class="btn ghost" data-ac="edit">Editar</button><button class="btn warn" data-ac="del">Excluir</button></td></tr>`).join('');
+  view.innerHTML = `
+    <div class="header"><h1>Fornecedores</h1><div class="actions-row"><button class="btn" id="novo-forn">Novo fornecedor</button></div></div>
+    ${rows? `<table><thead><tr><th>Nome</th><th>Contato</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="muted">Nenhum fornecedor.</p>'}
+  `;
+  document.getElementById('novo-forn').onclick = ()=> editarFornecedor();
+  view.querySelector('tbody')?.addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    const id=b.closest('tr').dataset.id;
+    if(b.dataset.ac==='del'){ if(confirm('Excluir fornecedor?')){ state.fornecedores = state.fornecedores.filter(x=>x.id!==id); persistAll(); navigate('fornecedores'); } }
+    if(b.dataset.ac==='edit'){ const f = state.fornecedores.find(x=>x.id===id); editarFornecedor(f); }
+  });
+};
+function editarFornecedor(f){
+  const isEdit = !!f; f = f || { id: uid(), nome:'', contato:'' };
+  const html = `
+    <div class="section">
+      <h3>${isEdit?'Editar':'Novo'} fornecedor</h3>
+      <div class="grid cols-2">
+        <div><label>Nome</label><input id="f-nome" value="${f.nome}"></div>
+        <div><label>Contato</label><input id="f-contato" value="${f.contato}"></div>
+      </div>
+      <div class="actions-row" style="margin-top:8px"><button class="btn" id="f-salvar">Salvar</button><button class="btn ghost" id="f-cancel">Cancelar</button></div>
+    </div>
+  `;
+  view.insertAdjacentHTML('afterbegin', html);
+  document.getElementById('f-salvar').onclick = ()=>{
+    const obj = { id: f.id, nome: document.getElementById('f-nome').value.trim(), contato: document.getElementById('f-contato').value.trim() };
+    if(!obj.nome) return alert('Informe o nome do fornecedor.');
+    if(isEdit) Object.assign(state.fornecedores.find(x=>x.id===f.id), obj); else state.fornecedores.push(obj);
+    persistAll(); navigate('fornecedores');
+  };
+  document.getElementById('f-cancel').onclick = ()=> navigate('fornecedores');
+}
+
+/* ========== RELATÓRIOS ========== */
+routes.relatorios = ()=>{
+  const totalVendas = state.vendas.reduce((s,v)=>s+v.total,0);
+  const vendasMes = state.vendas.filter(v => v.dataISO.slice(0,7) === new Date().toISOString().slice(0,7)).reduce((s,v)=>s+v.total,0);
+  const topProdutos = (() => {
+    const map = {};
+    state.vendas.forEach(v=> v.itens.forEach(i=> map[i.nome] = (map[i.nome]||0) + i.qtd));
+    return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  })();
+  const baixos = state.produtos.filter(p=>p.qtd <=5).slice(0,8);
+
+  view.innerHTML = `
+    <div class="header"><h1>Relatórios</h1></div>
+    <div class="cards">
+      <div class="card"><h2>Receita total</h2><p>${fmtBRL(totalVendas)}</p></div>
+      <div class="card"><h2>Receita (mês)</h2><p>${fmtBRL(vendasMes)}</p></div>
+      <div class="card"><h2>Vendas registradas</h2><p>${state.vendas.length}</p></div>
+      <div class="card"><h2>Produtos cadastrados</h2><p>${state.produtos.length}</p></div>
+    </div>
+    <div class="section" style="margin-top:18px"><h3>Top produtos por quantidade vendida</h3>
+      ${topProdutos.length? `<ul>${topProdutos.map(t=>`<li>${t[0]} — ${t[1]} un.</li>`).join('')}</ul>` : '<p class="muted">Sem dados.</p>'}
+    </div>
+    <div class="section" style="margin-top:12px"><h3>Produtos com baixo estoque</h3>
+      ${baixos.length? `<ul>${baixos.map(p=>`<li>${p.nome} — ${p.qtd} un.</li>`).join('')}</ul>` : '<p class="muted">Nenhum produto com baixo estoque.</p>'}
+    </div>
+  `;
+};
+
+/* ========== BACKUP ========== */
+routes.backup = ()=>{
+  view.innerHTML = `
+    <div class="header"><h1>Backup</h1></div>
+    <div class="section">
+      <div class="actions-row">
+        <button class="btn" id="exp-json">Exportar JSON</button>
+        <label class="btn ghost" for="imp-file">Importar JSON</label>
+        <input id="imp-file" type="file" accept=".json" style="display:none"/>
+      </div>
+      <p class="muted" style="margin-top:8px">Faça backups regulares — os dados ficam no seu navegador (localStorage).</p>
+    </div>
+  `;
+  document.getElementById('exp-json').onclick = ()=>{
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `loja-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  };
+  document.getElementById('imp-file').onchange = e=>{
+    const file = e.target.files[0]; if(!file) return;
+    const fr = new FileReader();
+    fr.onload = ev=>{
+      try{
+        const data = JSON.parse(ev.target.result);
+        // only accept arrays we know
+        if(Array.isArray(data.produtos)) state.produtos = data.produtos;
+        if(Array.isArray(data.clientes)) state.clientes = data.clientes;
+        if(Array.isArray(data.vendas)) state.vendas = data.vendas;
+        if(Array.isArray(data.movimentacoes)) state.movimentacoes = data.movimentacoes;
+        if(Array.isArray(data.fornecedores)) state.fornecedores = data.fornecedores;
+        persistAll(); alert('Importação concluída.'); navigate('dashboard');
+      }catch(err){ alert('Arquivo inválido.'); }
+    };
+    fr.readAsText(file);
+  };
+};
+
+/* ========== INICIALIZAÇÃO ========== */
+// seed opcional (apenas se estiver vazio)
+if(state.produtos.length===0 && state.clientes.length===0){
+  // seed demo (comente se quiser começar vazio)
+  state.produtos.push({id:uid(),nome:'Vibrador Classic',categoria:'Vibradores',qtd:12,preco:79.9,fornecedor:'Fornecedor A'});
+  state.produtos.push({id:uid(),nome:'Gel Funcional 15ml',categoria:'Lubrificantes',qtd:30,preco:19.9,fornecedor:'Fornecedor B'});
+  state.clientes.push({id:uid(),nome:'Mariana Souza',telefone:'(61)99999-0000',email:'maria@example.com',endereco:'Rua A, 123'});
+  persistAll();
+}
+
+// start
+navigate('dashboard');
+</script>
+</body>
+</html>
