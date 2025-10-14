@@ -82,8 +82,18 @@
             <label>Nome</label><input type="text" id="p-nome" placeholder="Nome do produto">
           </div>
           <div>
-            <label>Categoria</label><input type="text" id="p-cat" placeholder="Categoria">
+            <label>Categoria</label>
+            <select id="p-cat">
+              <option value="">— Selecione a categoria —</option>
+              <option value="Lubrificantes">Lubrificantes</option>
+              <option value="Vibradores">Vibradores</option>
+              <option value="Cosméticos">Cosméticos</option>
+              <option value="Acessórios">Acessórios</option>
+              <option value="Roupas">Roupas</option>
+              <option value="Brinquedos Eróticos">Brinquedos Eróticos</option>
+            </select>
           </div>
+
           <div>
             <label>Quantidade</label><input type="number" id="p-qtd" value="1" min="0">
           </div>
@@ -400,6 +410,42 @@ function renderProdutos(filter=''){
   document.getElementById('filter-prod').addEventListener('input', e => renderProdutos(e.target.value.trim()));
   stats.textContent = `${state.produtos.length} produtos • mostrando ${items.length}`;
 }
+function populateCategorias(selected=''){
+  const sel = document.getElementById('p-cat');
+  // pegar categorias únicas do estado
+  const cats = [...new Set(state.produtos.map(p=>p.categoria).filter(c=>c))].sort();
+  sel.innerHTML = '<option value="">— Selecione —</option>' + cats.map(c=>`<option value="${c}" ${c===selected?'selected':''}>${c}</option>`).join('');
+}
+
+function openProduto(id){
+  editingProdId = id || null;
+  if(editingProdId){
+    const p = state.produtos.find(x=>x.id===editingProdId);
+    if(!p) return alert('Produto não encontrado');
+    modalProdTitle.textContent = 'Editar Produto';
+    inNome.value = p.nome || '';
+    inQtd.value = p.qtd || 0;
+    inPreco.value = p.preco || 0;
+    inForn.value = p.fornecedor || '';
+    inSKU.value = p.sku || '';
+    currentImgBase64 = p.img || '';
+    if(currentImgBase64){ imgPrev.src = currentImgBase64; imgPrev.style.display = 'block'; } 
+    else { imgPrev.style.display = 'none'; }
+    populateCategorias(p.categoria); // <-- aqui
+  } else {
+    modalProdTitle.textContent = 'Novo Produto';
+    inNome.value = '';
+    inQtd.value = 1;
+    inPreco.value = 0;
+    inForn.value = '';
+    inSKU.value = '';
+    inImg.value = '';
+    imgPrev.style.display = 'none';
+    currentImgBase64 = '';
+    populateCategorias(); // <-- aqui
+  }
+  modalProduto.classList.add('open');
+}
 
 /* abrir modal produto (novo/editar) */
 const modalProduto = document.getElementById('modalProduto');
@@ -691,3 +737,4 @@ document.querySelectorAll('.nav li').forEach(li => li.addEventListener('click', 
 </script>
 </body>
 </html>
+
